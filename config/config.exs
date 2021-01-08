@@ -13,10 +13,10 @@ config :sudoku,
 # Configures the endpoint
 config :sudoku, SudokuWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "PNZRl4/WFXg1UnL9HqHRkBwbsFPVYno0sSuA8WSDTQNeWW7Xtgk7rPPn3116b6s0",
+  secret_key_base: "UjPiJ0kt/sq8EVPdPdRSnDsgjHmdIyvhyV/0/+Wpwl8xwE3+6czyZCWWgyCay2bG",
   render_errors: [view: SudokuWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Sudoku.PubSub,
-  live_view: [signing_salt: "59GUelsK"]
+  live_view: [signing_salt: "3n/Au6O7"]
 
 # Configures Elixir's Logger
 config :logger, :console,

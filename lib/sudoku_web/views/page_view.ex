@@ -16,4 +16,8 @@ defmodule SudokuWeb.PageView do
 
   def border_l(x, _y) when x in [1, 4, 7], do: "border-l-4"
   def border_l(_x, _y), do: "border-l"
+
+  def render_candidates(game, x, y) do
+    game |> Sudoku.candidates(x, y) |> Enum.join(", ")
+  end
 end

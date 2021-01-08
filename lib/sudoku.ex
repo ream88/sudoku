@@ -18,17 +18,8 @@ defmodule Sudoku do
   end
 
   def solve(game) do
-    for x <- 1..9, y <- 1..9 do
-      horizontal_candidates = horizontal_candidates(game, x, y)
-      vertical_candidates = vertical_candidates(game, x, y)
-      box_candidates = box_candidates(game, x, y)
-
-      @candidates
-      |> Enum.filter(fn candidate ->
-        candidate in horizontal_candidates and
-          candidate in vertical_candidates and
-          candidate in box_candidates
-      end)
+    for y <- 1..9, x <- 1..9 do
+      candidates(game, x, y)
       |> IO.inspect(label: "candidates at #{x}:#{y}", charlists: true)
       |> case do
         [candidate] -> IO.inspect(candidate, label: "candidate at #{x}:#{y}")
@@ -37,10 +28,23 @@ defmodule Sudoku do
     end
   end
 
+  def candidates(game, x, y) do
+    horizontal_candidates = horizontal_candidates(game, x, y)
+    vertical_candidates = vertical_candidates(game, x, y)
+    box_candidates = box_candidates(game, x, y)
+
+    @candidates
+    |> Enum.filter(fn candidate ->
+      candidate in horizontal_candidates and
+        candidate in vertical_candidates and
+        candidate in box_candidates
+    end)
+  end
+
   def horizontal_candidates(game, x, y) do
     case get(game, x, y) do
       0 ->
-        used = for y <- 1..9, do: get(game, x, y)
+        used = for x <- 1..9, do: get(game, x, y)
         @candidates -- used
 
       _ ->
@@ -51,7 +55,7 @@ defmodule Sudoku do
   def vertical_candidates(game, x, y) do
     case get(game, x, y) do
       0 ->
-        used = for x <- 1..9, do: get(game, x, y)
+        used = for y <- 1..9, do: get(game, x, y)
         @candidates -- used
 
       _ ->
@@ -63,7 +67,7 @@ defmodule Sudoku do
     case get(game, x, y) do
       0 ->
         {x, y} = find_box(x, y)
-        used = for x <- x..(x + 2), y <- y..(y + 2), do: get(game, x, y)
+        used = for y <- y..(y + 2), x <- x..(x + 2), do: get(game, x, y)
         @candidates -- used
 
       _ ->
@@ -76,7 +80,13 @@ defmodule Sudoku do
   end
 
   def get(game, x, y) do
-    game |> Enum.at(x - 1) |> Enum.at(y - 1)
+    game |> Enum.at(y - 1) |> Enum.at(x - 1)
+  end
+
+  def put(game, x, y, number) do
+    List.update_at(game, y - 1, fn list ->
+      List.update_at(list, x - 1, fn _ -> number end)
+    end)
   end
 
   def solved?(game) do

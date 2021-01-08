@@ -16,13 +16,13 @@ defmodule SudokuTest do
   test "horizontal_candidates/3" do
     assert [1, 2, 3, 4, 5, 6, 7] == Sudoku.horizontal_candidates(@game, 1, 1)
     assert [] == Sudoku.horizontal_candidates(@game, 2, 1)
-    assert [2, 3, 4, 5, 6, 9] == Sudoku.horizontal_candidates(@game, 3, 1)
+    assert [2, 3, 4, 5, 6, 9] == Sudoku.horizontal_candidates(@game, 1, 3)
   end
 
   test "vertical_candidates/3" do
     assert [2, 4, 5, 6, 7, 8] == Sudoku.vertical_candidates(@game, 1, 1)
     assert [] == Sudoku.vertical_candidates(@game, 1, 2)
-    assert [1, 2, 4, 5, 6, 9] == Sudoku.vertical_candidates(@game, 1, 4)
+    assert [1, 2, 4, 5, 6, 9] == Sudoku.vertical_candidates(@game, 4, 1)
   end
 
   test "box_candidates/3" do
@@ -35,5 +35,11 @@ defmodule SudokuTest do
     assert {1, 1} == Sudoku.find_box(1, 1)
     assert {1, 4} == Sudoku.find_box(3, 5)
     assert {7, 7} == Sudoku.find_box(9, 9)
+  end
+
+  test "put/4" do
+    assert 2 == @game |> Sudoku.put(1, 1, 2) |> Sudoku.get(1, 1)
+    assert 2 == @game |> Sudoku.put(1, 3, 2) |> Sudoku.get(1, 3)
+    assert 3 == @game |> Sudoku.put(5, 5, 3) |> Sudoku.get(5, 5)
   end
 end

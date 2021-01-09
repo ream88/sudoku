@@ -4,7 +4,12 @@ defmodule SudokuWeb.PageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, game: Sudoku.game(), selected: nil)}
+    socket =
+      socket
+      |> assign_game(Sudoku.game())
+      |> assign(selected: nil)
+
+    {:ok, socket}
   end
 
   @impl true
@@ -23,7 +28,7 @@ defmodule SudokuWeb.PageLive do
 
         {x, y} ->
           socket
-          |> assign(game: Sudoku.put(socket.assigns.game, x, y, String.to_integer(number)))
+          |> assign_game(Sudoku.put(socket.assigns.game, x, y, String.to_integer(number)))
           |> assign(selected: nil)
       end
 
@@ -31,7 +36,7 @@ defmodule SudokuWeb.PageLive do
   end
 
   @impl true
-  def handle_event("clear", %{}, socket) do
+  def handle_event("clear", _params, socket) do
     socket =
       case socket.assigns.selected do
         nil ->
@@ -39,10 +44,50 @@ defmodule SudokuWeb.PageLive do
 
         {x, y} ->
           socket
-          |> assign(game: Sudoku.put(socket.assigns.game, x, y, 0))
+          |> assign_game(Sudoku.put(socket.assigns.game, x, y, 0))
           |> assign(selected: nil)
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("solve", _params, socket) do
+    socket =
+      socket
+      |> assign_game(solve(socket.assigns.game))
+      |> assign(selected: nil)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:solve, socket) do
+    socket =
+      socket
+      |> assign_game(solve(socket.assigns.game))
+      |> assign(selected: nil)
+
+    {:noreply, socket}
+  end
+
+  defp assign_game(socket, game) do
+    socket
+    |> assign(game: game)
+    |> assign(candidates: Sudoku.candidates(game))
+  end
+
+  defp solve(game) do
+    game
+    |> Sudoku.candidates()
+    |> Enum.find(fn {_, v} -> length(v) == 1 end)
+    |> case do
+      {{x, y}, [candidate]} ->
+        Process.send_after(self(), :solve, 1)
+        game |> Sudoku.put(x, y, candidate)
+
+      nil ->
+        game
+    end
   end
 end

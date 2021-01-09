@@ -18,14 +18,20 @@ defmodule Sudoku do
   end
 
   def solve(game) do
-    for y <- 1..9, x <- 1..9 do
-      candidates(game, x, y)
-      |> IO.inspect(label: "candidates at #{x}:#{y}", charlists: true)
-      |> case do
-        [candidate] -> IO.inspect(candidate, label: "candidate at #{x}:#{y}")
-        _ -> nil
-      end
+    game
+    |> candidates()
+    |> Enum.find(fn {_, v} -> length(v) == 1 end)
+    |> case do
+      {{x, y}, [candidate]} ->
+        game |> put(x, y, candidate) |> solve
+
+      nil ->
+        game
     end
+  end
+
+  def candidates(game) do
+    for y <- 1..9, x <- 1..9, into: %{}, do: {{x, y}, candidates(game, x, y)}
   end
 
   def candidates(game, x, y) do
@@ -40,14 +46,13 @@ defmodule Sudoku do
           end)
       end
 
-    {candidates, other} = Map.pop!(cache, {x,y})
+    {candidates, other} = Map.pop!(cache, {x, y})
     other = other |> Map.values() |> List.flatten()
 
     case candidates |> Enum.filter(&(&1 not in other)) do
       [single] -> [single]
       _ -> candidates
     end
-
   end
 
   defp calculate_candidates(game, x, y) do

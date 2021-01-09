@@ -32,9 +32,9 @@ defmodule SudokuTest do
   end
 
   test "find_box/2" do
-    assert {1, 1} == Sudoku.find_box(1, 1)
-    assert {1, 4} == Sudoku.find_box(3, 5)
-    assert {7, 7} == Sudoku.find_box(9, 9)
+    assert {1..3, 1..3} == Sudoku.find_box(1, 1)
+    assert {1..3, 4..6} == Sudoku.find_box(3, 5)
+    assert {7..9, 7..9} == Sudoku.find_box(9, 9)
   end
 
   test "put/4" do

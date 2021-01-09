@@ -3,12 +3,27 @@
   <header class="my-10 text-4xl text-center">Sudoku</header>
 
   <main class="flex items-center">
-    <div class="grid grid-cols-9 game grid-rows-9">
+    <div class="grid grid-cols-9 grid-rows-9 game">
       <%= for y <- 1..9, x <- 1..9 do %>
         <div class="inline-flex items-center justify-center w-16 h-16 <%= border_classes(x, y) %> <%= if @selected == {x, y}, do: "bg-blue-100" %>" phx-click="select" phx-value-x="<%= x %>" phx-value-y="<%= y %>">
           <%= case Sudoku.get(@game, x, y) do %>
           <% 0 -> %>
-            <%= render_candidates(@game, x, y) %>
+            <%= case Sudoku.candidates(@game, x, y) do %>
+            <% [] -> %>
+              <span class="bg-red-500"></span>
+            <% candidates when length(candidates) == 1 -> %>
+              <div class="grid grid-cols-3 grid-rows-3 w-full h-full justify-center items-center">
+                <%= for candidate <- 1..9 do %>
+                  <span class="text-xs text-center text-red-500 animate-pulse"><%= if candidate in candidates, do: candidate %></span>
+                <% end %>
+              </div>
+            <% candidates -> %>
+              <div class="grid grid-cols-3 grid-rows-3 w-full h-full justify-center items-center">
+                <%= for candidate <- 1..9 do %>
+                  <span class="text-xs text-center"><%= if candidate in candidates, do: candidate %></span>
+                <% end %>
+              </div>
+            <% end %>
           <% number -> %>
             <span class="text-4xl"><%= number %></span>
           <% end %>
@@ -17,9 +32,9 @@
     </div>
     <aside class="grid grid-cols-3 grid-rows-4 gap-3 ml-16">
       <%= for i <- 1..9 do %>
-        <button class="w-16 h-16 text-xl text-white bg-blue-500 rounded-md active:bg-blue-700 shadow-md" phx-click="put" phx-value-number="<%= i %>"><%= i %></button>
+        <button class="w-16 h-16 text-xl text-white bg-blue-500 rounded-md shadow-md active:bg-blue-700" phx-click="put" phx-value-number="<%= i %>"><%= i %></button>
       <% end %>
-      <button class="flex items-center justify-center w-16 h-16 col-start-2 text-white bg-red-500 rounded-md active:bg-red-700 shadow-md" phx-click="clear">
+      <button class="flex items-center justify-center w-16 h-16 col-start-2 text-white bg-red-500 rounded-md shadow-md active:bg-red-700" phx-click="clear">
         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>

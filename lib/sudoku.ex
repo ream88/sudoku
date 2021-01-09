@@ -29,6 +29,28 @@ defmodule Sudoku do
   end
 
   def candidates(game, x, y) do
+    {xs, ys} = find_box(x, y)
+
+    cache =
+      for y <- ys, x <- xs, reduce: %{} do
+        cache ->
+          cache
+          |> Map.put_new_lazy({x, y}, fn ->
+            calculate_candidates(game, x, y)
+          end)
+      end
+
+    {candidates, other} = Map.pop!(cache, {x,y})
+    other = other |> Map.values() |> List.flatten()
+
+    case candidates |> Enum.filter(&(&1 not in other)) do
+      [single] -> [single]
+      _ -> candidates
+    end
+
+  end
+
+  defp calculate_candidates(game, x, y) do
     horizontal_candidates = horizontal_candidates(game, x, y)
     vertical_candidates = vertical_candidates(game, x, y)
     box_candidates = box_candidates(game, x, y)
@@ -66,8 +88,8 @@ defmodule Sudoku do
   def box_candidates(game, x, y) do
     case get(game, x, y) do
       0 ->
-        {x, y} = find_box(x, y)
-        used = for y <- y..(y + 2), x <- x..(x + 2), do: get(game, x, y)
+        {xs, ys} = find_box(x, y)
+        used = for y <- ys, x <- xs, do: get(game, x, y)
         @candidates -- used
 
       _ ->
@@ -76,7 +98,10 @@ defmodule Sudoku do
   end
 
   def find_box(x, y) do
-    {div(x - 1, 3) * 3 + 1, div(y - 1, 3) * 3 + 1}
+    x = div(x - 1, 3) * 3 + 1
+    y = div(y - 1, 3) * 3 + 1
+
+    {x..(x + 2), y..(y + 2)}
   end
 
   def get(game, x, y) do
